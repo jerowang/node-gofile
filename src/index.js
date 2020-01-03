@@ -62,14 +62,14 @@ async function uploadFile(file, options = {}) {
     }
     if (options.expire) {
       if (
-        !isNaN(options.expire) && options.expire.length > 10000000000
+        !isNaN(options.expire) && options.expire > 10000000000
           ? options.expire
           : options.expire / 1000 > Date.now() / 1000
       ) {
         fd.append(
           "expire",
           Math.round(
-            options.expire.length > 10000000000
+            options.expire > 10000000000
               ? options.expire
               : options.expire / 1000
           )
