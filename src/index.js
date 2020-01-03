@@ -1,5 +1,14 @@
+const crypto = require("crypto");
+
 const axios = require("axios");
 const FormData = require("form-data");
+
+function sha256hash(str) {
+  return crypto
+    .createHash("sha256")
+    .update(str)
+    .digest("hex");
+}
 
 async function getServer(code) {
   try {
@@ -114,7 +123,7 @@ async function removeFile(code, removalCode) {
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-site"
       },
-      referrer: "https://gofile.io/?c=4gPaQp",
+      referrer: `https://gofile.io/?c=${code}`,
       referrerPolicy: "no-referrer-when-downgrade",
       mode: "cors"
     });
@@ -129,12 +138,13 @@ async function removeFile(code, removalCode) {
 }
 
 async function getFileInfo(code, p) {
-  // TODO Get password
   try {
     const server = await getServer(code);
 
     const res = await axios({
-      url: `https://${server}.gofile.io/getUpload?c=${code}`,
+      url: `https://${server}.gofile.io/getUpload?c=${code}${
+        p ? `&p=${sha256hash(p)}` : ""
+      }`,
       method: "GET",
       headers: {
         accept: "*/*",
