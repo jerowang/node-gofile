@@ -137,13 +137,13 @@ async function removeFile(code, removalCode) {
   }
 }
 
-async function getFileInfo(code, p) {
+async function getFileInfo(code, p = "") {
   try {
     const server = await getServer(code);
 
     const res = await axios({
       url: `https://${server}.gofile.io/getUpload?c=${code}${
-        p ? `&p=${sha256hash(p)}` : ""
+        p && p !== "" ? `&p=${sha256hash(p)}` : ""
       }`,
       method: "GET",
       headers: {
@@ -169,8 +169,42 @@ async function getFileInfo(code, p) {
   }
 }
 
+async function downloadFiles(code, p = "", responseType = "arraybuffer") {
+  try {
+    const fileInfo = await getFileInfo(code, p);
+
+    const reqs = Object.keys(fileInfo.files)
+      .map(k => fileInfo.files[k])
+      .map(f =>
+        axios({
+          url: f.link,
+          headers: {
+            accept:
+              "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+            "accept-language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+            "cache-control": "no-cache",
+            pragma: "no-cache",
+            "sec-fetch-dest": "document",
+            "sec-fetch-mode": "navigate",
+            "sec-fetch-site": "none",
+            "upgrade-insecure-requests": "1"
+          },
+          referrerPolicy: "no-referrer-when-downgrade",
+          method: "GET",
+          mode: "cors",
+          responseType
+        })
+      );
+
+    return (await Promise.all(reqs)).map(r => r.data);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 module.exports = {
   uploadFile,
   removeFile,
-  getFileInfo
+  getFileInfo,
+  downloadFiles
 };
