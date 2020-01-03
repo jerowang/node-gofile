@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const stream = require("stream");
 
 const axios = require("axios");
 const FormData = require("form-data");
@@ -39,11 +40,19 @@ async function getServer(code) {
   }
 }
 
-async function uploadFile(file, options = {}) {
+async function uploadFiles(files, options = {}) {
   try {
     const server = await getServer();
     const fd = new FormData();
-    fd.append("filesUploaded", file);
+
+    files.forEach(f => {
+      if (f.fn === "") {
+        fd.append("filesUploaded", f.file);
+      } else {
+        fd.append("filesUploaded", f.file, f.fn);
+      }
+    });
+
     fd.append("category", "file");
 
     if (options.description) {
@@ -104,6 +113,24 @@ async function uploadFile(file, options = {}) {
     return res.data.data;
   } catch (e) {
     console.error(e);
+  }
+}
+
+async function uploadFile(arg1, arg2, arg3) {
+  if (arg1 instanceof Buffer) {
+    if (arg2 && arg2 !== "" && typeof arg2 !== "object") {
+      return uploadFiles([{ file: arg1, fn: arg2 }], arg3);
+    } else {
+      throw Error("Filename must not be blank when using a Buffer.");
+    }
+  } else if (arg1 instanceof stream.Readable) {
+    if (arg2 && arg2 !== "" && typeof arg2 !== "object") {
+      return uploadFiles([{ file: arg1, fn: arg2 }], arg3);
+    } else {
+      return uploadFiles([{ file: arg1 }], arg3);
+    }
+  } else {
+    throw Error("Invalid file type");
   }
 }
 
@@ -204,6 +231,7 @@ async function downloadFiles(code, p = "", responseType = "arraybuffer") {
 
 module.exports = {
   uploadFile,
+  uploadFiles,
   removeFile,
   getFileInfo,
   downloadFiles
