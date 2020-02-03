@@ -147,6 +147,7 @@ async function uploadFiles(files, options = {}) {
         "sec-fetch-site": "same-site",
         ...fd.getHeaders()
       },
+      maxContentLength: Infinity,
       referrer: "https://gofile.io/?t=uploadFiles",
       referrerPolicy: "no-referrer-when-downgrade",
       mode: "cors",
