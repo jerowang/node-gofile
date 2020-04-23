@@ -85,7 +85,7 @@ async function getServer(code) {
  */
 async function uploadFiles(files, options = {}) {
   try {
-    const server = (await getServer(code)) || "srv-file9";
+    const server = (await getServer()) || "srv-file9";
     const fd = new FormData();
 
     files.forEach((f) => {
