@@ -43,10 +43,7 @@ const FormData = require("form-data");
  */
 
 function sha256hash(str) {
-  return crypto
-    .createHash("sha256")
-    .update(str)
-    .digest("hex");
+  return crypto.createHash("sha256").update(str).digest("hex");
 }
 
 async function getServer(code) {
@@ -60,13 +57,13 @@ async function getServer(code) {
         pragma: "no-cache",
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-site"
+        "sec-fetch-site": "same-site",
       },
       referrer: "https://gofile.io/?t=uploadFiles",
       referrerPolicy: "no-referrer-when-downgrade",
       body: null,
       method: "GET",
-      mode: "cors"
+      mode: "cors",
     });
 
     if (res.data.status !== "ok") {
@@ -91,7 +88,7 @@ async function uploadFiles(files, options = {}) {
     const server = await getServer();
     const fd = new FormData();
 
-    files.forEach(f => {
+    files.forEach((f) => {
       if (f.fn === "") {
         fd.append("filesUploaded", f.file);
       } else {
@@ -145,13 +142,13 @@ async function uploadFiles(files, options = {}) {
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
         "sec-fetch-site": "same-site",
-        ...fd.getHeaders()
+        ...fd.getHeaders(),
       },
       maxContentLength: Infinity,
       referrer: "https://gofile.io/?t=uploadFiles",
       referrerPolicy: "no-referrer-when-downgrade",
       mode: "cors",
-      data: fd
+      data: fd,
     });
 
     if (res.data.status !== "ok") {
@@ -217,11 +214,11 @@ async function removeUpload(code, removalCode) {
         pragma: "no-cache",
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-site"
+        "sec-fetch-site": "same-site",
       },
       referrer: `https://gofile.io/?c=${code}`,
       referrerPolicy: "no-referrer-when-downgrade",
-      mode: "cors"
+      mode: "cors",
     });
 
     if (res.data.status !== "ok") {
@@ -241,7 +238,7 @@ async function removeUpload(code, removalCode) {
  */
 async function getUploadInfo(code, p = "") {
   try {
-    const server = await getServer(code);
+    const server = (await getServer(code)) || "srv-file9";
 
     const res = await axios({
       url: `https://${server}.gofile.io/getUpload?c=${code}${
@@ -255,11 +252,11 @@ async function getUploadInfo(code, p = "") {
         pragma: "no-cache",
         "sec-fetch-dest": "empty",
         "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-site"
+        "sec-fetch-site": "same-site",
       },
       referrer: `https://gofile.io/?c=${code}`,
       referrerPolicy: "no-referrer-when-downgrade",
-      mode: "cors"
+      mode: "cors",
     });
 
     if (res.data.status !== "ok") {
@@ -283,8 +280,8 @@ async function downloadFiles(code, p = "", responseType = "arraybuffer") {
     const uploadInfo = await getUploadInfo(code, p);
 
     const reqs = Object.keys(uploadInfo.files)
-      .map(k => uploadInfo.files[k])
-      .map(f =>
+      .map((k) => uploadInfo.files[k])
+      .map((f) =>
         axios({
           url: f.link,
           headers: {
@@ -296,16 +293,16 @@ async function downloadFiles(code, p = "", responseType = "arraybuffer") {
             "sec-fetch-dest": "document",
             "sec-fetch-mode": "navigate",
             "sec-fetch-site": "none",
-            "upgrade-insecure-requests": "1"
+            "upgrade-insecure-requests": "1",
           },
           referrerPolicy: "no-referrer-when-downgrade",
           method: "GET",
           mode: "cors",
-          responseType
+          responseType,
         })
       );
 
-    return (await Promise.all(reqs)).map(r => r.data);
+    return (await Promise.all(reqs)).map((r) => r.data);
   } catch (e) {
     console.error(e);
   }
@@ -316,5 +313,5 @@ module.exports = {
   uploadFiles,
   removeUpload,
   getUploadInfo,
-  downloadFiles
+  downloadFiles,
 };
