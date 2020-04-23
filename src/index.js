@@ -85,7 +85,7 @@ async function getServer(code) {
  */
 async function uploadFiles(files, options = {}) {
   try {
-    const server = await getServer();
+    const server = (await getServer(code)) || "srv-file9";
     const fd = new FormData();
 
     files.forEach((f) => {
@@ -202,7 +202,7 @@ async function uploadFile(arg1, arg2, arg3) {
  */
 async function removeUpload(code, removalCode) {
   try {
-    const server = await getServer(code);
+    const server = (await getServer(code)) || "srv-file9";
 
     const res = await axios({
       url: `https://${server}.gofile.io/deleteUpload?c=${code}&rc=${removalCode}`,
