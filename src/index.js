@@ -67,9 +67,7 @@ async function getServer(code) {
     });
 
     if (res.data.status !== "ok") {
-      throw new Error(
-        `Fetching server info failed: ${JSON.stringify(res.data)}`
-      );
+      throw new Error(`Fetching server info failed: ${JSON.stringify(res.data)}`);
     }
     return res.data.data.server;
   } catch (e) {
@@ -88,7 +86,7 @@ async function uploadFiles(files, options = {}) {
     const server = (await getServer()) || "srv-file9";
     const fd = new FormData();
 
-    files.forEach((f) => {
+    files.forEach(f => {
       if (f.fn === "") {
         fd.append("filesUploaded", f.file);
       } else {
@@ -118,14 +116,7 @@ async function uploadFiles(files, options = {}) {
           ? options.expire
           : options.expire / 1000 > Date.now() / 1000
       ) {
-        fd.append(
-          "expire",
-          Math.round(
-            options.expire > 10000000000
-              ? options.expire
-              : options.expire / 1000
-          )
-        );
+        fd.append("expire", Math.round(options.expire > 10000000000 ? options.expire : options.expire / 1000));
       } else {
         throw new Error("Invalid value for field expire. ");
       }
@@ -178,7 +169,7 @@ async function uploadFiles(files, options = {}) {
  */
 
 async function uploadFile(arg1, arg2, arg3) {
-  if (arg1 instanceof Buffer) {
+  if (arg1 instanceof Buffer || arg1 instanceof ArrayBuffer) {
     if (arg2 && arg2 !== "" && typeof arg2 !== "object") {
       return uploadFiles([{ file: arg1, fn: arg2 }], arg3);
     } else {
@@ -241,9 +232,7 @@ async function getUploadInfo(code, p = "") {
     const server = (await getServer(code)) || "srv-file9";
 
     const res = await axios({
-      url: `https://${server}.gofile.io/getUpload?c=${code}${
-        p && p !== "" ? `&p=${sha256hash(p)}` : ""
-      }`,
+      url: `https://${server}.gofile.io/getUpload?c=${code}${p && p !== "" ? `&p=${sha256hash(p)}` : ""}`,
       method: "GET",
       headers: {
         accept: "*/*",
@@ -280,8 +269,8 @@ async function downloadFiles(code, p = "", responseType = "arraybuffer") {
     const uploadInfo = await getUploadInfo(code, p);
 
     const reqs = Object.keys(uploadInfo.files)
-      .map((k) => uploadInfo.files[k])
-      .map((f) =>
+      .map(k => uploadInfo.files[k])
+      .map(f =>
         axios({
           url: f.link,
           headers: {
@@ -302,7 +291,7 @@ async function downloadFiles(code, p = "", responseType = "arraybuffer") {
         })
       );
 
-    return (await Promise.all(reqs)).map((r) => r.data);
+    return (await Promise.all(reqs)).map(r => r.data);
   } catch (e) {
     console.error(e);
   }
